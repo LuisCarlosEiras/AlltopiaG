@@ -5,19 +5,24 @@ import pandas as pd
 import plotly.express as px
 import google.generativeai as genai
 from PIL import Image
-import base64
+import requests
 from io import BytesIO
 
 load_dotenv()
 
-# Retrieve the API key from the environment variables
+# Retrieve the API keys from the environment variables
 google_api_key = os.getenv("GOOGLE_API_KEY")
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
-if google_api_key:
-    genai.configure(api_key=google_api_key)
-else:
+if not google_api_key:
     st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
     st.stop()
+
+if not openai_api_key:
+    st.error("OpenAI API key not found. Please configure the OPENAI_API_KEY in the environment variables.")
+    st.stop()
+
+genai.configure(api_key=google_api_key)
 
 # Characteristics of a utopian society
 characteristics = [
@@ -144,6 +149,27 @@ def get_gemini_response(prompt):
     response = model.generate_content(prompt)
     return response.text
 
+def generate_image(prompt):
+    url = "https://api.openai.com/v1/images/generations"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {openai_api_key}"
+    }
+    data = {
+        "prompt": prompt,
+        "n": 1,
+        "size": "1024x1024"
+    }
+    response = requests.post(url, headers=headers, json=data)
+    if response.status_code == 200:
+        image_url = response.json()['data'][0]['url']
+        image_response = requests.get(image_url)
+        image = Image.open(BytesIO(image_response.content))
+        return image
+    else:
+        st.error(f"Error generating image: {response.text}")
+        return None
+
 # Full-width analysis section
 st.markdown('<div class="full-width-section">', unsafe_allow_html=True)
 st.markdown('<p class="subtitle">Analysis of your utopia</p>', unsafe_allow_html=True)
@@ -172,8 +198,15 @@ if st.button("Analyze your society with Google Generative AI"):
                 st.write(text)
             else:
                 st.write(paragraph)
+        
+        # Generate image based on the description
+        image_prompt = f"Create an image of a utopian society with these characteristics: {values}. {paragraphs[-1]}"
+        image = generate_image(image_prompt)
+        if image:
+            st.subheader("Generated Image of Utopian Society")
+            st.image(image, caption="Generated Image of Utopian Society", use_column_width=True)
     
     except Exception as e:
-        st.error(f"Error in analysis: {str(e)}")
+        st.error(f"Error in analysis or image generation: {str(e)}")
 
 st.markdown('</div>', unsafe_allow_html=True)
