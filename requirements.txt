@@ -1,7 +1,8 @@
-streamlit
+qstreamlit
 pandas
 plotly
 google-generativeai
 python-dotenv
 Pillow
+requests
 
