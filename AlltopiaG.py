@@ -4,6 +4,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import google.generativeai as genai
+from PIL import Image
 
 load_dotenv()
 
@@ -146,6 +147,11 @@ def get_gemini_response(question):
     response = model.generate_content(question)
     return response.text
 
+def get_gemini_response_image(input_text, image):
+    model = genai.GenerativeModel('gemini-pro-vision')
+    response = model.generate_content([input_text, image])
+    return response.image
+
 # Analysis using Google Generative AI
 if st.button("Analyze your society with Google Generative AI"):
     try:
@@ -166,6 +172,15 @@ if st.button("Analyze your society with Google Generative AI"):
                 st.write(text)
             else:
                 st.write(paragraph)
+        
+        # Generate prompt for image
+        image_prompt = (
+            f"Create an image that represents a utopian society with the following characteristics: {values}. "
+        )
+        image_response = get_gemini_response_image(image_prompt, None)
+        
+        st.subheader("Generated Image of Utopian Society")
+        st.image(image_response, caption="Generated Image of Utopian Society", use_column_width=True)
     
     except Exception as e:
         st.error(f"Error calling the Google Generative AI API: {str(e)}")
