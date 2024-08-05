@@ -1,7 +1,12 @@
+import os
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import google.generativeai as genai
+
+# Get Google API key from environment variable
+GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
+genai.configure(api_key=GOOGLE_API_KEY)
 
 # Characteristics of a utopian society
 characteristics = [
@@ -130,20 +135,19 @@ st.write(f"Average of Values: {average:.2f}")
 st.write(f"Classification: {analysis}")
 
 # Function to get the API key securely
-def get_gemini_api_key():
-    return st.secrets.get("GEMINI_API_KEY")
+def get_google_api_key():
+    return os.environ.get("GOOGLE_API_KEY")
 
-# Analysis using Gemini Pro language model
-if st.button("Analyze your society with Gemini Pro"):
-    api_key = get_gemini_api_key()
+# Analysis using Google Generative AI
+if st.button("Analyze your society with Google Generative AI"):
+    api_key = get_google_api_key()
     if not api_key:
-        st.error("Gemini Pro API key not found. Please configure the GEMINI_API_KEY in Streamlit secrets.")
-        st.info("If you're running this locally, you can set the API key in a .streamlit/secrets.toml file.")
-        st.info("If you're using Streamlit Cloud, you can set the secret in the app's settings.")
+        st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
+        st.info("If you're running this locally, you can set the API key in your system's environment variables.")
     else:
         try:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-pro')
+            model = genai.GenerativeModel('google-generative-ai')
             
             input_text = (
                 f"Analyze the utopian society with the following characteristics: {values}. "
@@ -160,7 +164,7 @@ if st.button("Analyze your society with Gemini Pro"):
             image_prompt_response = model.generate_content(image_prompt_input)
             image_prompt = image_prompt_response.text
             
-            st.subheader("Analysis of your utopia by Gemini Pro")
+            st.subheader("Analysis of your utopia by Google Generative AI")
             
             # Split the analysis into paragraphs and subtitles
             paragraphs = analysis.split('\n\n')
@@ -174,9 +178,9 @@ if st.button("Analyze your society with Gemini Pro"):
             
             st.subheader("Image Prompt")
             st.write(image_prompt)
-            st.write("Note: Image generation is not available with Gemini Pro. You may need to use a separate image generation service or provide a placeholder image.")
+            st.write("Note: Image generation is not available with Google Generative AI. You may need to use a separate image generation service or provide a placeholder image.")
         
         except Exception as e:
-            st.error(f"Error calling the Gemini Pro API: {str(e)}")
+            st.error(f"Error calling the Google Generative AI API: {str(e)}")
 
 st.markdown('</div>', unsafe_allow_html=True)
