@@ -170,6 +170,23 @@ def generate_image(prompt):
         st.error(f"Error generating image: {response.text}")
         return None
 
+def create_image_prompt(values):
+    top_characteristics = sorted(values.items(), key=lambda x: x[1], reverse=True)[:3]
+    prompt = "A utopian cityscape with: "
+    for char, value in top_characteristics:
+        if char == "Sustainability":
+            prompt += "green buildings covered in plants, solar panels, "
+        elif char == "Technology and Innovation":
+            prompt += "futuristic transportation systems, advanced infrastructure, "
+        elif char == "Social Equality":
+            prompt += "diverse groups of people interacting harmoniously, "
+        elif char == "Peace and Harmony":
+            prompt += "peaceful public spaces, community gardens, "
+        elif char == "Freedom":
+            prompt += "open spaces, expressive art installations, "
+    prompt += "Focus on: bustling city center, lush parks, and happy diverse people. Photorealistic style."
+    return prompt[:1000]  # Ensure prompt doesn't exceed 1000 characters
+
 # Full-width analysis section
 st.markdown('<div class="full-width-section">', unsafe_allow_html=True)
 st.markdown('<p class="subtitle">Analysis of your utopia</p>', unsafe_allow_html=True)
@@ -183,7 +200,7 @@ if st.button("Analyze your society with Google Generative AI"):
         input_text = (
             f"Analyze the utopian society with the following characteristics: {values}. "
             "Write the analysis with subtitles and 5 paragraphs of text. "
-            "Also, describe in detail what an image representing this society might look like."
+            "Focus on how these characteristics manifest in city design, public spaces, and social interactions."
         )
         response = get_gemini_response(input_text)
         
@@ -199,8 +216,8 @@ if st.button("Analyze your society with Google Generative AI"):
             else:
                 st.write(paragraph)
         
-        # Generate image based on the description
-        image_prompt = f"Create an image of a utopian society with these characteristics: {values}. {paragraphs[-1]}"
+        # Generate image based on the top characteristics
+        image_prompt = create_image_prompt(values)
         image = generate_image(image_prompt)
         if image:
             st.subheader("Generated Image of Utopian Society")
