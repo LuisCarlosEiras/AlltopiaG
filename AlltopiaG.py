@@ -160,7 +160,7 @@ if st.button("Analyze your society with AI"):
             google_analysis = text_response.text
             
             # Image generation
-            vision_model = genai.GenerativeModel('gemini-pro-vision')
+            vision_model = genai.GenerativeModel('gemini-1.5-flash')
             image_prompt = (
                 f"Create an image representing a utopian society with the following characteristics: {values}. "
                 "The image should be vibrant and detailed, showcasing various aspects of this utopian society. "
