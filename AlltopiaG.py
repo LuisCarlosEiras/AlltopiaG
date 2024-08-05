@@ -143,12 +143,12 @@ st.write(f"Average of Values: {average:.2f}")
 st.write(f"Classification: {analysis}")
 
 def get_gemini_response(question):
-    model = genai.GenerativeModel('gemini-pro')
+    model = genai.GenerativeModel('gemini-1.5-flash')
     response = model.generate_content(question)
     return response.text
 
 def get_gemini_response_image(input_text):
-    model = genai.GenerativeModel('gemini-pro-vision')
+    model = genai.GenerativeModel('gemini-1.5-flash-vision')
     response = model.generate_content(input_text)
     return response.image
 
