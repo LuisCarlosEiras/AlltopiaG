@@ -147,11 +147,6 @@ def get_gemini_response(question):
     response = model.generate_content(question)
     return response.text
 
-def get_gemini_response_image(input_text):
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    response = model.generate_content(input_text, image_prompt=True)
-    return response.image
-
 # Analysis using Google Generative AI
 if st.button("Analyze your society with Google Generative AI"):
     try:
@@ -173,14 +168,9 @@ if st.button("Analyze your society with Google Generative AI"):
             else:
                 st.write(paragraph)
         
-        # Generate prompt for image
-        image_prompt = (
-            f"Create an image that represents a utopian society with the following characteristics: {values}. "
-        )
-        image_response = get_gemini_response_image(image_prompt)
-        
+        # Placeholder for image (since image generation directly might not be supported)
         st.subheader("Generated Image of Utopian Society")
-        st.image(image_response, caption="Generated Image of Utopian Society", use_column_width=True)
+        st.image("path/to/placeholder_image.jpg", caption="Generated Image of Utopian Society", use_column_width=True)
     
     except Exception as e:
         st.error(f"Error calling the Google Generative AI API: {str(e)}")
