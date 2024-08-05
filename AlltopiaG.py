@@ -137,7 +137,9 @@ def get_gemini_api_key():
 if st.button("Analyze your society with Gemini Pro"):
     api_key = get_gemini_api_key()
     if not api_key:
-        st.error("Gemini Pro API key not found. Please configure the key in Streamlit settings.")
+        st.error("Gemini Pro API key not found. Please configure the GEMINI_API_KEY in Streamlit secrets.")
+        st.info("If you're running this locally, you can set the API key in a .streamlit/secrets.toml file.")
+        st.info("If you're using Streamlit Cloud, you can set the secret in the app's settings.")
     else:
         try:
             genai.configure(api_key=api_key)
