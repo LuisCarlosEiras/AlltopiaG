@@ -5,15 +5,23 @@ import pandas as pd
 import plotly.express as px
 import google.generativeai as genai
 from PIL import Image
+import requests
+from io import BytesIO
 
 load_dotenv()
 
-# Retrieve the API key from the environment variables
-api_key = os.getenv("GOOGLE_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
+# Retrieve the API keys from the environment variables
+google_api_key = os.getenv("GOOGLE_API_KEY")
+stability_api_key = os.getenv("STABILITY_API_KEY")
+
+if google_api_key:
+    genai.configure(api_key=google_api_key)
 else:
     st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
+    st.stop()
+
+if not stability_api_key:
+    st.error("Stability AI API key not found. Please configure the STABILITY_API_KEY in the environment variables.")
     st.stop()
 
 # Characteristics of a utopian society
@@ -30,7 +38,7 @@ characteristics = [
     "Happiness and Personal Fulfillment"
 ]
 
-# CSS style for title, subtitles, and centered image
+# CSS style (unchanged)
 st.markdown("""
 <style>
     .full-width-title {
@@ -136,20 +144,65 @@ with col2:
 # Analyze the society
 average, analysis = analyze_society(values)
 
+def get_gemini_response(question):
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    response = model.generate_content(question)
+    return response.text
+
+def generate_image(prompt):
+    url = "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image"
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {stability_api_key}"
+    }
+    body = {
+        "steps": 40,
+        "width": 1024,
+        "height": 1024,
+        "seed": 0,
+        "cfg_scale": 5,
+        "samples": 1,
+        "text_prompts": [
+            {
+                "text": prompt,
+                "weight": 1
+            }
+        ],
+    }
+    response = requests.post(url, headers=headers, json=body)
+    if response.status_code == 200:
+        data = response.json()
+        image_data = data["artifacts"][0]["base64"]
+        image = Image.open(BytesIO(base64.b64decode(image_data)))
+        return image
+    else:
+        st.error(f"Error generating image: {response.text}")
+        return None
+
 # Full-width analysis section
 st.markdown('<div class="full-width-section">', unsafe_allow_html=True)
 st.markdown('<p class="subtitle">Analysis of your utopia</p>', unsafe_allow_html=True)
 st.write(f"Average of Values: {average:.2f}")
 st.write(f"Classification: {analysis}")
 
-def get_gemini_response(question):
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    response = model.generate_content(question)
-    return response.text
-
 # Analysis using Google Generative AI
 if st.button("Analyze your society with Google Generative AI"):
     try:
+        # Generate image prompt
+        image_prompt_input = (
+            f"Create a prompt for an image that represents a utopian society with the following characteristics: {values}. "
+            "The prompt should be detailed and suitable for an AI image generation model."
+        )
+        image_prompt = get_gemini_response(image_prompt_input)
+        
+        # Generate and display the image
+        st.subheader("Generated Image of Utopian Society")
+        image = generate_image(image_prompt)
+        if image:
+            st.image(image, caption="Generated Image of Utopian Society", use_column_width=True)
+        
+        # Generate text analysis
         input_text = (
             f"Analyze the utopian society with the following characteristics: {values}. "
             "Write the analysis with subtitles and 5 paragraphs of text."
@@ -167,12 +220,8 @@ if st.button("Analyze your society with Google Generative AI"):
                 st.write(text)
             else:
                 st.write(paragraph)
-        
-        # Placeholder for image (since image generation directly might not be supported)
-        st.subheader("Generated Image of Utopian Society")
-        st.image("path/to/placeholder_image.jpg", caption="Generated Image of Utopian Society", use_column_width=True)
     
     except Exception as e:
-        st.error(f"Error calling the Google Generative AI API: {str(e)}")
+        st.error(f"Error in analysis or image generation: {str(e)}")
 
 st.markdown('</div>', unsafe_allow_html=True)
