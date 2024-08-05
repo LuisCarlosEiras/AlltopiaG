@@ -148,14 +148,12 @@ if st.button("Analyze your society with AI"):
     else:
         try:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('google-generative-ai')
-            
             input_text = (
                 f"Analyze the utopian society with the following characteristics: {values}. "
                 "Write the analysis with subtitles and 5 paragraphs of text."
             )
-            response = model.generate_content(input_text)
-            analysis = response.text
+            response = genai.generate_text(prompt=input_text)
+            analysis = response.result
             
             # Gerar prompt para imagem usando OpenAI
             image_prompt_input = (
