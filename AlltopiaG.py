@@ -3,28 +3,19 @@ from dotenv import load_dotenv
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import openai
 import google.generativeai as genai
-from PIL import Image
-import requests
-from io import BytesIO
 
+# Carregar variáveis de ambiente
 load_dotenv()
 
-# Retrieve the API keys from the environment variables
-google_api_key = os.getenv("GOOGLE_API_KEY")
-openai_api_key = os.getenv("OPENAI_API_KEY")
+# Configurar chave da API do OpenAI
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-if not google_api_key:
-    st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
-    st.stop()
+# Configurar chave da API do Google Generative AI
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-if not openai_api_key:
-    st.error("OpenAI API key not found. Please configure the OPENAI_API_KEY in the environment variables.")
-    st.stop()
-
-genai.configure(api_key=google_api_key)
-
-# Characteristics of a utopian society
+# Características de uma sociedade utópica
 characteristics = [
     "Social Equality",
     "Justice and Equity",
@@ -38,7 +29,7 @@ characteristics = [
     "Happiness and Personal Fulfillment"
 ]
 
-# CSS style (unchanged)
+# Estilo CSS para título, subtítulos e imagem centralizada
 st.markdown("""
 <style>
     .full-width-title {
@@ -82,19 +73,19 @@ st.markdown("""
         margin: 20px 0;
     }
     .centered-image img {
-        max-width: 50%;
+        max-width: 70%;
         height: auto;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Full-width title
+# Título em largura total
 st.markdown('<p class="full-width-title">Alltopia, the game</p>', unsafe_allow_html=True)
 
-# Subtitle
+# Subtítulo
 st.markdown('<p class="subtitle">Create your perfect society</p>', unsafe_allow_html=True)
 
-# Function to analyze the society based on adjusted values
+# Função para analisar a sociedade com base nos valores ajustados
 def analyze_society(values):
     average = sum(values.values()) / len(values)
     
@@ -107,29 +98,29 @@ def analyze_society(values):
     
     return average, analysis
 
-# Initialize the values dictionary
+# Inicializar o dicionário de valores
 values = {characteristic: 5.0 for characteristic in characteristics}
 
-# Split the screen into two equal columns
+# Dividir a tela em duas colunas do mesmo tamanho
 col1, col2 = st.columns(2)
 
-# Create sliders for each characteristic in the left column
+# Criação de sliders para cada característica na coluna da esquerda
 with col1:
     st.markdown('<p class="subtitle">Choose the characteristics</p>', unsafe_allow_html=True)
     for characteristic in characteristics:
         values[characteristic] = st.slider(characteristic, 0.0, 10.0, 5.0)
 
-# Display the bar chart in the right column
+# Exibir o gráfico de barras na coluna da direita
 with col2:
     st.markdown('<p class="subtitle">Characteristic Values</p>', unsafe_allow_html=True)
     
-    # Create a DataFrame for the chart
+    # Criar um DataFrame para o gráfico
     df = pd.DataFrame(list(values.items()), columns=['Characteristic', 'Value'])
     
-    # Define a custom color palette
+    # Definir uma paleta de cores personalizada
     color_palette = px.colors.qualitative.Prism
 
-    # Create the bar chart using Plotly Express with different colors
+    # Criar o gráfico de barras usando Plotly Express com cores diferentes
     fig = px.bar(df, x='Characteristic', y='Value', 
                  labels={'Value': 'Score', 'Characteristic': ''},
                  height=400,
@@ -138,92 +129,88 @@ with col2:
     
     fig.update_layout(xaxis_tickangle=-45, showlegend=False)
     
-    # Display the chart
+    # Exibir o gráfico
     st.plotly_chart(fig, use_container_width=True)
 
-# Analyze the society
+# Analisar a sociedade
 average, analysis = analyze_society(values)
 
-def get_gemini_response(prompt):
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    response = model.generate_content(prompt)
-    return response.text
+# Função para obter a chave da API do Google de forma segura
+def get_google_api_key():
+    return os.environ.get("GOOGLE_API_KEY")
 
-def generate_image(prompt):
-    url = "https://api.openai.com/v1/images/generations"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {openai_api_key}"
-    }
-    data = {
-        "prompt": prompt,
-        "n": 1,
-        "size": "1024x1024"
-    }
-    response = requests.post(url, headers=headers, json=data)
-    if response.status_code == 200:
-        image_url = response.json()['data'][0]['url']
-        image_response = requests.get(image_url)
-        image = Image.open(BytesIO(image_response.content))
-        return image
+# Análise usando Google Generative AI e OpenAI para imagem
+if st.button("Analyze your society with AI"):
+    api_key = get_google_api_key()
+    if not api_key:
+        st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
+        st.info("If you're running this locally, you can set the API key in your system's environment variables.")
     else:
-        st.error(f"Error generating image: {response.text}")
-        return None
+        try:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('google-generative-ai')
+            
+            input_text = (
+                f"Analyze the utopian society with the following characteristics: {values}. "
+                "Write the analysis with subtitles and 5 paragraphs of text."
+            )
+            response = model.generate_content(input_text)
+            analysis = response.text
+            
+            # Gerar prompt para imagem usando OpenAI
+            image_prompt_input = (
+                f"Crie uma imagem que represente uma sociedade utópica com as seguintes características: {values}. "
+                "O prompt deve ter 3 linhas de texto, em português do Brasil."
+            )
+            image_prompt_response = openai.Completion.create(
+                engine="gpt-3.5-turbo-instruct",
+                prompt=image_prompt_input,
+                max_tokens=150,
+                n=1,
+                stop=None,
+                temperature=1.0
+            )
+            image_prompt = image_prompt_response.choices[0].text.strip()
+            
+            # Gerar imagem automaticamente com o prompt
+            response = openai.Image.create(
+                model="dall-e-3",
+                prompt=image_prompt,
+                size="1024x1024",
+                n=1,
+            )
+            image_url = response['data'][0]['url']
+            
+            # Exibir a imagem centralizada
+            st.markdown('<div class="centered-image">', unsafe_allow_html=True)
+            st.image(image_url, width=716)  # 70% de 1024 é aproximadamente 716
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+            st.subheader("Analysis of your utopia by Google Generative AI")
+            
+            # Dividir a análise em parágrafos e subtítulos
+            paragraphs = analysis.split('\n\n')
+            for paragraph in paragraphs:
+                if ': ' in paragraph:
+                    subtitle, text = paragraph.split(': ', 1)
+                    st.markdown(f"**{subtitle}**")
+                    st.write(text)
+                else:
+                    st.write(paragraph)
+        
+        except Exception as e:
+            st.error(f"Error calling the Google Generative AI API: {str(e)}")
 
-def create_image_prompt(values):
-    top_characteristics = sorted(values.items(), key=lambda x: x[1], reverse=True)[:3]
-    prompt = "A utopian cityscape with: "
-    for char, value in top_characteristics:
-        if char == "Sustainability":
-            prompt += "green buildings covered in plants, solar panels, "
-        elif char == "Technology and Innovation":
-            prompt += "futuristic transportation systems, advanced infrastructure, "
-        elif char == "Social Equality":
-            prompt += "diverse groups of people interacting harmoniously, "
-        elif char == "Peace and Harmony":
-            prompt += "peaceful public spaces, community gardens, "
-        elif char == "Freedom":
-            prompt += "open spaces, expressive art installations, "
-    prompt += "Focus on: bustling city center, lush parks, and happy diverse people. Photorealistic style."
-    return prompt[:1000]  # Ensure prompt doesn't exceed 1000 characters
-
-# Full-width analysis section
+# Seção de análise em largura total
 st.markdown('<div class="full-width-section">', unsafe_allow_html=True)
 st.markdown('<p class="subtitle">Analysis of your utopia</p>', unsafe_allow_html=True)
 st.write(f"Average of Values: {average:.2f}")
 st.write(f"Classification: {analysis}")
-
-# Analysis using Google Generative AI
-if st.button("Analyze your society with Google Generative AI"):
-    try:
-        # Generate text analysis
-        input_text = (
-            f"Analyze the utopian society with the following characteristics: {values}. "
-            "Write the analysis with subtitles and 5 paragraphs of text. "
-            "Focus on how these characteristics manifest in city design, public spaces, and social interactions."
-        )
-        response = get_gemini_response(input_text)
-        
-        st.subheader("Analysis of your utopia by Google Generative AI")
-        
-        # Split the analysis into paragraphs and subtitles
-        paragraphs = response.split('\n\n')
-        for paragraph in paragraphs:
-            if ': ' in paragraph:
-                subtitle, text = paragraph.split(': ', 1)
-                st.markdown(f"**{subtitle}**")
-                st.write(text)
-            else:
-                st.write(paragraph)
-        
-        # Generate image based on the top characteristics
-        image_prompt = create_image_prompt(values)
-        image = generate_image(image_prompt)
-        if image:
-            st.subheader("Generated Image of Utopian Society")
-            st.image(image, caption="Generated Image of Utopian Society", use_column_width=True)
-    
-    except Exception as e:
-        st.error(f"Error in analysis or image generation: {str(e)}")
-
 st.markdown('</div>', unsafe_allow_html=True)
+
+# Aviso final
+st.markdown("""
+<div style="text-align: center; padding: 20px; background-color: #f0f2f6; margin-top: 30px;">
+    <p>Adjust the characteristics above to generate a new utopian society</p>
+</div>
+""", unsafe_allow_html=True)
