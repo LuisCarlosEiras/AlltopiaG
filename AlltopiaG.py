@@ -147,9 +147,9 @@ def get_gemini_response(question):
     response = model.generate_content(question)
     return response.text
 
-def get_gemini_response_image(input_text, image):
+def get_gemini_response_image(input_text):
     model = genai.GenerativeModel('gemini-pro-vision')
-    response = model.generate_content([input_text, image])
+    response = model.generate_content(input_text)
     return response.image
 
 # Analysis using Google Generative AI
@@ -177,7 +177,7 @@ if st.button("Analyze your society with Google Generative AI"):
         image_prompt = (
             f"Create an image that represents a utopian society with the following characteristics: {values}. "
         )
-        image_response = get_gemini_response_image(image_prompt, None)
+        image_response = get_gemini_response_image(image_prompt)
         
         st.subheader("Generated Image of Utopian Society")
         st.image(image_response, caption="Generated Image of Utopian Society", use_column_width=True)
