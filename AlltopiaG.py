@@ -139,29 +139,10 @@ with col2:
 # Analyze the society
 average, analysis = analyze_society(values)
 
-def get_gemini_response(prompt, image_prompt=None):
-    model = genai.GenerativeModel('gemini-pro')
-    if image_prompt:
-        response = model.generate_content([prompt, image_prompt])
-    else:
-        response = model.generate_content(prompt)
+def get_gemini_response(prompt):
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    response = model.generate_content(prompt)
     return response.text
-
-def generate_image(prompt):
-    model = genai.GenerativeModel('gemini-pro-vision')
-    response = model.generate_content(
-        ["Generate an image based on this description:", prompt],
-        generation_config=genai.types.GenerationConfig(
-            max_output_tokens=2048,
-        )
-    )
-    # Extract the base64-encoded image data from the response
-    for part in response.parts:
-        if part.mime_type.startswith('image/'):
-            image_data = part.data
-            image = Image.open(BytesIO(base64.b64decode(image_data)))
-            return image
-    return None
 
 # Full-width analysis section
 st.markdown('<div class="full-width-section">', unsafe_allow_html=True)
@@ -172,27 +153,13 @@ st.write(f"Classification: {analysis}")
 # Analysis using Google Generative AI
 if st.button("Analyze your society with Google Generative AI"):
     try:
-        # Generate image prompt
-        image_prompt_input = (
-            f"Create a prompt for an image that represents a utopian society with the following characteristics: {values}. "
-            "The prompt should be detailed and suitable for an AI image generation model."
-        )
-        image_prompt = get_gemini_response(image_prompt_input)
-        
-        # Generate and display the image
-        st.subheader("Generated Image of Utopian Society")
-        image = generate_image(image_prompt)
-        if image:
-            st.image(image, caption="Generated Image of Utopian Society", use_column_width=True)
-        else:
-            st.warning("Failed to generate image. Proceeding with text analysis.")
-        
         # Generate text analysis
         input_text = (
             f"Analyze the utopian society with the following characteristics: {values}. "
-            "Write the analysis with subtitles and 5 paragraphs of text."
+            "Write the analysis with subtitles and 5 paragraphs of text. "
+            "Also, describe in detail what an image representing this society might look like."
         )
-        response = get_gemini_response(input_text, image_prompt)
+        response = get_gemini_response(input_text)
         
         st.subheader("Analysis of your utopia by Google Generative AI")
         
@@ -207,6 +174,6 @@ if st.button("Analyze your society with Google Generative AI"):
                 st.write(paragraph)
     
     except Exception as e:
-        st.error(f"Error in analysis or image generation: {str(e)}")
+        st.error(f"Error in analysis: {str(e)}")
 
 st.markdown('</div>', unsafe_allow_html=True)
