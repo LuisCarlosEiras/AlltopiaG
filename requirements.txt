@@ -3,3 +3,7 @@ pandas
 plotly
 google-generativeai
 dotenv
+os
+pathlib
+textwrap
+PIL
