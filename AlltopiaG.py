@@ -3,10 +3,14 @@ from dotenv import load_dotenv
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import openai
 import google.generativeai as genai
 
 # Load environment variables
 load_dotenv()
+
+# Configure OpenAI API key
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Configure Google Generative AI API key
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
@@ -25,7 +29,7 @@ characteristics = [
     "Happiness and Personal Fulfillment"
 ]
 
-# CSS style for title, subtitles, and centered text
+# CSS style for title, subtitles, and centered image
 st.markdown("""
 <style>
     .full-width-title {
@@ -62,12 +66,15 @@ st.markdown("""
         padding: 20px;
         margin-top: 30px;
     }
-    .centered-text {
-        text-align: center;
-        padding: 20px;
-        background-color: #f0f2f6;
-        border-radius: 10px;
+    .centered-image {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         margin: 20px 0;
+    }
+    .centered-image img {
+        max-width: 70%;
+        height: auto;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -137,8 +144,8 @@ with col2:
 def get_google_api_key():
     return os.environ.get("GOOGLE_API_KEY")
 
-# Analysis using Google Generative AI for text
-if st.button("Analyze your society with Google Generative AI"):
+# Analysis using Google Generative AI and OpenAI for image
+if st.button("Analyze your society with AI"):
     api_key = get_google_api_key()
     if not api_key:
         st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
@@ -146,28 +153,41 @@ if st.button("Analyze your society with Google Generative AI"):
     else:
         try:
             genai.configure(api_key=api_key)
-            
-            # Text analysis
-            text_model = genai.GenerativeModel('gemini-pro')
-            text_prompt = (
+            input_text = (
                 f"Analyze the utopian society with the following characteristics: {values}. "
                 "Write the analysis with 5 paragraphs of text."
             )
-            text_response = text_model.generate_content(text_prompt)
-            google_analysis = text_response.text
+            response = genai.generate_text(prompt=input_text)
+            google_analysis = response.result
             
-            # Generate a description of the utopian society
-            description_prompt = (
-                f"Describe a utopian society with the following characteristics: {values}. "
-                "The description should be vivid and detailed, showcasing various aspects of this utopian society. "
-                "Focus on how these characteristics manifest in the daily lives of the inhabitants. "
-                "Write this description in 3-4 paragraphs."
+            # Generate prompt for image using OpenAI
+            image_prompt_input = (
+                f"Create an image representing a utopian society with the following characteristics: {values}. "
+                "The prompt should be 3 lines of text, in Brazilian Portuguese."
             )
-            description_response = text_model.generate_content(description_prompt)
-            utopia_description = description_response.text
+            image_prompt_response = openai.Completion.create(
+                engine="gpt-3.5-turbo-instruct",
+                prompt=image_prompt_input,
+                max_tokens=150,
+                n=1,
+                stop=None,
+                temperature=1.0
+            )
+            image_prompt = image_prompt_response.choices[0].text.strip()
             
-            st.subheader("Visualization of your utopia")
-            st.markdown(f'<div class="centered-text">{utopia_description}</div>', unsafe_allow_html=True)
+            # Automatically generate image with the prompt
+            response = openai.Image.create(
+                model="dall-e-3",
+                prompt=image_prompt,
+                size="1024x1024",
+                n=1,
+            )
+            image_url = response['data'][0]['url']
+            
+            # Display the centered image
+            st.markdown('<div class="centered-image">', unsafe_allow_html=True)
+            st.image(image_url, width=716)  # 70% of 1024 is approximately 716
+            st.markdown('</div>', unsafe_allow_html=True)
             
             st.subheader("Analysis of your utopia by Google Generative AI")
             
