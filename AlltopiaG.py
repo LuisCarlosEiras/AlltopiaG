@@ -109,6 +109,14 @@ with col1:
     st.markdown('<p class="subtitle">Choose the characteristics</p>', unsafe_allow_html=True)
     for characteristic in characteristics:
         values[characteristic] = st.slider(characteristic, 0.0, 10.0, 5.0)
+    
+    # Full-width analysis section below the sliders
+    st.markdown('<div class="full-width-section">', unsafe_allow_html=True)
+    st.markdown('<p class="subtitle">Analysis of your utopia</p>', unsafe_allow_html=True)
+    average, analysis = analyze_society(values)
+    st.write(f"Average of Values: {average:.2f}")
+    st.write(f"Classification: {analysis}")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Display the bar chart in the right column
 with col2:
@@ -132,9 +140,6 @@ with col2:
     # Display the chart
     st.plotly_chart(fig, use_container_width=True)
 
-# Analyze the society
-average, analysis = analyze_society(values)
-
 # Function to get the Google API key securely
 def get_google_api_key():
     return os.environ.get("GOOGLE_API_KEY")
@@ -150,7 +155,7 @@ if st.button("Analyze your society with AI"):
             genai.configure(api_key=api_key)
             input_text = (
                 f"Analyze the utopian society with the following characteristics: {values}. "
-                "Write the analysis with subtitles and 5 paragraphs of text."
+                "Write the analysis with 5 paragraphs of text."
             )
             response = genai.generate_text(prompt=input_text)
             google_analysis = response.result
@@ -158,7 +163,7 @@ if st.button("Analyze your society with AI"):
             # Generate prompt for image using OpenAI
             image_prompt_input = (
                 f"Create an image representing a utopian society with the following characteristics: {values}. "
-                "The prompt should be 3 lines of text."
+                "The prompt should be 3 lines of text, in Brazilian Portuguese."
             )
             image_prompt_response = openai.Completion.create(
                 engine="gpt-3.5-turbo-instruct",
@@ -186,25 +191,13 @@ if st.button("Analyze your society with AI"):
             
             st.subheader("Analysis of your utopia by Google Generative AI")
             
-            # Split the analysis into paragraphs and subtitles
+            # Split the analysis into paragraphs
             paragraphs = google_analysis.split('\n\n')
             for paragraph in paragraphs:
-                if ': ' in paragraph:
-                    subtitle, text = paragraph.split(': ', 1)
-                    st.markdown(f"**{subtitle}**")
-                    st.write(text)
-                else:
-                    st.write(paragraph)
+                st.write(paragraph)
         
         except Exception as e:
             st.error(f"Error calling the Google Generative AI API: {str(e)}")
-
-# Full-width analysis section
-st.markdown('<div class="full-width-section">', unsafe_allow_html=True)
-st.markdown('<p class="subtitle">Analysis of your utopia</p>', unsafe_allow_html=True)
-st.write(f"Average of Values: {average:.2f}")
-st.write(f"Classification: {analysis}")
-st.markdown('</div>', unsafe_allow_html=True)
 
 # Final notice
 st.markdown("""
