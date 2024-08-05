@@ -163,7 +163,7 @@ if st.button("Analyze your society with AI"):
             # Generate prompt for image using OpenAI
             image_prompt_input = (
                 f"Create an image representing a utopian society with the following characteristics: {values}. "
-                "The prompt should be 3 lines of text, in Brazilian Portuguese."
+                "The prompt should be 3 lines of text."
             )
             image_prompt_response = openai.Completion.create(
                 engine="gpt-3.5-turbo-instruct",
