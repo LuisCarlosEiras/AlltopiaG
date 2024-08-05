@@ -144,8 +144,8 @@ with col2:
 def get_google_api_key():
     return os.environ.get("GOOGLE_API_KEY")
 
-# Analysis using Google Generative AI and OpenAI for image
-if st.button("Analyze your society with AI"):
+# Analysis using Google Generative AI 
+if st.button("Analyze your society Google Generative AI"):
     api_key = get_google_api_key()
     if not api_key:
         st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
@@ -163,7 +163,7 @@ if st.button("Analyze your society with AI"):
             # Generate prompt for image using OpenAI
             image_prompt_input = (
                 f"Create an image representing a utopian society with the following characteristics: {values}. "
-                "The prompt should be 3 lines of text, in Brazilian Portuguese."
+                "The prompt should be 3 lines of text."
             )
             image_prompt_response = openai.Completion.create(
                 engine="gpt-3.5-turbo-instruct",
