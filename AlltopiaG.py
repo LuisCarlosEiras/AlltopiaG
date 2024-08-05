@@ -3,14 +3,10 @@ from dotenv import load_dotenv
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import openai
 import google.generativeai as genai
 
 # Load environment variables
 load_dotenv()
-
-# Configure OpenAI API key
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Configure Google Generative AI API key
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
@@ -144,8 +140,8 @@ with col2:
 def get_google_api_key():
     return os.environ.get("GOOGLE_API_KEY")
 
-# Analysis using Google Generative AI and OpenAI for image
-if st.button("Analyze your utopia with Google Generative AI"):
+# Analysis using Google Generative AI for text and image
+if st.button("Analyze your society with AI"):
     api_key = get_google_api_key()
     if not api_key:
         st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
@@ -160,29 +156,17 @@ if st.button("Analyze your utopia with Google Generative AI"):
             response = genai.generate_text(prompt=input_text)
             google_analysis = response.result
             
-            # Generate prompt for image using OpenAI
+            # Generate prompt for image using Gemini Pro Vision
             image_prompt_input = (
                 f"Create an image representing a utopian society with the following characteristics: {values}. "
-                "The prompt should be 3 lines of text."
+                "The prompt should be 3 lines of text, in Brazilian Portuguese."
             )
-            image_prompt_response = openai.Completion.create(
-                engine="gpt-3.5-turbo-instruct",
-                prompt=image_prompt_input,
-                max_tokens=150,
-                n=1,
-                stop=None,
-                temperature=1.0
-            )
-            image_prompt = image_prompt_response.choices[0].text.strip()
+            image_prompt_response = genai.generate_text(prompt=image_prompt_input, max_tokens=150)
+            image_prompt = image_prompt_response.result.strip()
             
-            # Automatically generate image with the prompt
-            response = openai.Image.create(
-                model="dall-e-3",
-                prompt=image_prompt,
-                size="1024x1024",
-                n=1,
-            )
-            image_url = response['data'][0]['url']
+            # Automatically generate image with the prompt using Gemini Pro Vision
+            image_response = genai.generate_image(prompt=image_prompt, size="1024x1024")
+            image_url = image_response['data'][0]['url']
             
             # Display the centered image
             st.markdown('<div class="centered-image">', unsafe_allow_html=True)
