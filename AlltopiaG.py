@@ -141,7 +141,7 @@ def get_google_api_key():
     return os.environ.get("GOOGLE_API_KEY")
 
 # Analysis using Google Generative AI for text and image
-if st.button("Analyze your utopia with Google Generative AI"):
+if st.button("Analyze your society with AI"):
     api_key = get_google_api_key()
     if not api_key:
         st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
@@ -149,29 +149,31 @@ if st.button("Analyze your utopia with Google Generative AI"):
     else:
         try:
             genai.configure(api_key=api_key)
-            input_text = (
+            
+            # Text analysis
+            text_model = genai.GenerativeModel('gemini-pro')
+            text_prompt = (
                 f"Analyze the utopian society with the following characteristics: {values}. "
                 "Write the analysis with 5 paragraphs of text."
             )
-            response = genai.generate_text(prompt=input_text)
-            google_analysis = response.result
+            text_response = text_model.generate_content(text_prompt)
+            google_analysis = text_response.text
             
-            # Generate prompt for image using Gemini Pro Vision
-            image_prompt_input = (
+            # Image generation
+            vision_model = genai.GenerativeModel('gemini-pro-vision')
+            image_prompt = (
                 f"Create an image representing a utopian society with the following characteristics: {values}. "
-                "The prompt should be 3 lines of text."
+                "The image should be vibrant and detailed, showcasing various aspects of this utopian society. "
+                "Use a style that combines realism with elements of fantasy to capture the idealized nature of the society."
             )
-            image_prompt_response = genai.generate_text(prompt=image_prompt_input)
-            image_prompt = image_prompt_response.result.strip()
+            image_response = vision_model.generate_content(image_prompt)
             
-            # Automatically generate image with the prompt using Gemini Pro Vision
-            image_response = genai.generate_image(prompt=image_prompt, size="1024x1024")
-            image_url = image_response['data'][0]['url']
-            
-            # Display the centered image
-            st.markdown('<div class="centered-image">', unsafe_allow_html=True)
-            st.image(image_url, width=716)  # 70% of 1024 is approximately 716
-            st.markdown('</div>', unsafe_allow_html=True)
+            # Display the generated image
+            if image_response.parts:
+                image = image_response.parts[0].image_bytes
+                st.markdown('<div class="centered-image">', unsafe_allow_html=True)
+                st.image(image, width=716)  # 70% of 1024 is approximately 716
+                st.markdown('</div>', unsafe_allow_html=True)
             
             st.subheader("Analysis of your utopia by Google Generative AI")
             
