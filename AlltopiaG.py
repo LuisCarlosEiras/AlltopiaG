@@ -25,7 +25,7 @@ characteristics = [
     "Happiness and Personal Fulfillment"
 ]
 
-# CSS style for title, subtitles, and centered image
+# CSS style for title, subtitles, and centered text
 st.markdown("""
 <style>
     .full-width-title {
@@ -62,15 +62,12 @@ st.markdown("""
         padding: 20px;
         margin-top: 30px;
     }
-    .centered-image {
-        display: flex;
-        justify-content: center;
-        align-items: center;
+    .centered-text {
+        text-align: center;
+        padding: 20px;
+        background-color: #f0f2f6;
+        border-radius: 10px;
         margin: 20px 0;
-    }
-    .centered-image img {
-        max-width: 70%;
-        height: auto;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -140,7 +137,7 @@ with col2:
 def get_google_api_key():
     return os.environ.get("GOOGLE_API_KEY")
 
-# Analysis using Google Generative AI for text and image
+# Analysis using Google Generative AI for text
 if st.button("Analyze your society with AI"):
     api_key = get_google_api_key()
     if not api_key:
@@ -159,21 +156,18 @@ if st.button("Analyze your society with AI"):
             text_response = text_model.generate_content(text_prompt)
             google_analysis = text_response.text
             
-            # Image generation
-            vision_model = genai.GenerativeModel('gemini-1.5-flash')
-            image_prompt = (
-                f"Create an image representing a utopian society with the following characteristics: {values}. "
-                "The image should be vibrant and detailed, showcasing various aspects of this utopian society. "
-                "Use a style that combines realism with elements of fantasy to capture the idealized nature of the society."
+            # Generate a description of the utopian society
+            description_prompt = (
+                f"Describe a utopian society with the following characteristics: {values}. "
+                "The description should be vivid and detailed, showcasing various aspects of this utopian society. "
+                "Focus on how these characteristics manifest in the daily lives of the inhabitants. "
+                "Write this description in 3-4 paragraphs."
             )
-            image_response = vision_model.generate_content(image_prompt)
+            description_response = text_model.generate_content(description_prompt)
+            utopia_description = description_response.text
             
-            # Display the generated image
-            if image_response.parts:
-                image = image_response.parts[0].image_bytes
-                st.markdown('<div class="centered-image">', unsafe_allow_html=True)
-                st.image(image, width=716)  # 70% of 1024 is approximately 716
-                st.markdown('</div>', unsafe_allow_html=True)
+            st.subheader("Visualization of your utopia")
+            st.markdown(f'<div class="centered-text">{utopia_description}</div>', unsafe_allow_html=True)
             
             st.subheader("Analysis of your utopia by Google Generative AI")
             
