@@ -138,7 +138,7 @@ def get_google_api_key():
     return os.environ.get("GOOGLE_API_KEY")
 
 # Analysis using Google Generative AI for text
-if st.button("Analyze your society with AI"):
+if st.button("Analyze your society with Google Generative AI"):
     api_key = get_google_api_key()
     if not api_key:
         st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
