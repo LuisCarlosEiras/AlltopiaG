@@ -131,7 +131,7 @@ st.write(f"Classification: {analysis}")
 
 # Function to get the API key securely
 def get_gemini_api_key():
-    return st.secrets["GEMINI_API_KEY"]
+    return st.secrets.get("GEMINI_API_KEY")
 
 # Analysis using Gemini Pro language model
 if st.button("Analyze your society with Gemini Pro"):
