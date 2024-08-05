@@ -2,8 +2,6 @@ streamlit
 pandas
 plotly
 google-generativeai
-dotenv
-os
-pathlib
-textwrap
-PIL
+python-dotenv
+Pillow
+
