@@ -141,7 +141,7 @@ def get_google_api_key():
     return os.environ.get("GOOGLE_API_KEY")
 
 # Analysis using Google Generative AI for text and image
-if st.button("Analyze your society with AI"):
+if st.button("Analyze your utopia with Google Generative AI"):
     api_key = get_google_api_key()
     if not api_key:
         st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
@@ -159,9 +159,9 @@ if st.button("Analyze your society with AI"):
             # Generate prompt for image using Gemini Pro Vision
             image_prompt_input = (
                 f"Create an image representing a utopian society with the following characteristics: {values}. "
-                "The prompt should be 3 lines of text, in Brazilian Portuguese."
+                "The prompt should be 3 lines of text."
             )
-            image_prompt_response = genai.generate_text(prompt=image_prompt_input, max_tokens=150)
+            image_prompt_response = genai.generate_text(prompt=image_prompt_input)
             image_prompt = image_prompt_response.result.strip()
             
             # Automatically generate image with the prompt using Gemini Pro Vision
