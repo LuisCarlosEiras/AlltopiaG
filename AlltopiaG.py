@@ -187,6 +187,7 @@ if st.button("Analyze your society with Google Generative AI"):
 
 st.markdown('</div>', unsafe_allow_html=True)
 
+# New additions start here
 st.subheader("Utopia vs Reality")
 
 if st.button("Compare your utopia with the best countries' indices"):
@@ -199,40 +200,35 @@ if st.button("Compare your utopia with the best countries' indices"):
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel('gemini-pro')
             
-            # First, generate the analysis of the utopia
-            utopia_analysis_prompt = (
-                f"Analyze the utopian society with the following characteristics: {values}. "
-                "Write the analysis with subtitles and 5 paragraphs of text."
-            )
-            utopia_analysis_response = model.generate_content(utopia_analysis_prompt)
-            utopia_analysis = utopia_analysis_response.text
-            
-            st.subheader("Analysis of your utopia")
-            st.write(utopia_analysis)
-            
-            # Now, compare the generated analysis with the HDI indices
             comparison_prompt = (
-                f"Compare the following utopian society analysis:\n\n{utopia_analysis}\n\n"
-                "with the highest Human Development Index (HDI) of the following countries: "
-                "Norway – 0.957, "
-                "Switzerland and Ireland – 0.955, "
-                "Hong Kong (China) and Iceland - 0.949, "
-                "Germany – 0.947, "
-                "Sweden – 0.945, "
-                "Australia and Netherlands – 0.944, "
-                "Denmark -0.940, "
-                "Singapore and Finland – 0.938, "
-                "Finland – 0.938, "
-                "New Zealand and Belgium – 0.931, "
-                "Canada – 0.929, "
-                "United States – 0.926. Write a text of 10 lines."
+                f"Compare the utopian society with these characteristics: {values}\n"
+                "to the highest Human Development Index (HDI) of the following countries: "
+                "Norway – 0.957, Switzerland and Ireland – 0.955, "
+                "Hong Kong (China) and Iceland - 0.949, Germany – 0.947, "
+                "Sweden – 0.945, Australia and Netherlands – 0.944, "
+                "Denmark -0.940, Singapore and Finland – 0.938, "
+                "New Zealand and Belgium – 0.931, Canada – 0.929, United States – 0.926. "
+                "Write the comparison in exactly two paragraphs, each with 10 lines."
             )
             
             comparison_response = model.generate_content(comparison_prompt)
             comparison_text = comparison_response.text
             
             st.subheader("Comparison with Real-World Indices")
-            st.write(comparison_text)
+            
+            # Split the comparison text into paragraphs
+            paragraphs = comparison_text.split('\n\n')
+            
+            # Ensure we have exactly two paragraphs
+            if len(paragraphs) >= 2:
+                st.write(paragraphs[0])
+                st.write(paragraphs[1])
+            else:
+                st.write(comparison_text)
         
         except Exception as e:
             st.error(f"Error calling the Google Generative AI API: {str(e)}")
+
+
+
+
