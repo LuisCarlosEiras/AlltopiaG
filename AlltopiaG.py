@@ -187,7 +187,6 @@ if st.button("Analyze your society with Google Generative AI"):
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# New additions start here
 st.subheader("Utopia vs Reality")
 
 if st.button("Compare your utopia with the best countries' indices"):
@@ -198,10 +197,23 @@ if st.button("Compare your utopia with the best countries' indices"):
     else:
         try:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-pro')  # Updated model name
+            model = genai.GenerativeModel('gemini-pro')
             
+            # First, generate the analysis of the utopia
+            utopia_analysis_prompt = (
+                f"Analyze the utopian society with the following characteristics: {values}. "
+                "Write the analysis with subtitles and 5 paragraphs of text."
+            )
+            utopia_analysis_response = model.generate_content(utopia_analysis_prompt)
+            utopia_analysis = utopia_analysis_response.text
+            
+            st.subheader("Analysis of your utopia")
+            st.write(utopia_analysis)
+            
+            # Now, compare the generated analysis with the HDI indices
             comparison_prompt = (
-                f"Compare the generated analysis with the highest Human Development Index (HDI) of the following countries: "
+                f"Compare the following utopian society analysis:\n\n{utopia_analysis}\n\n"
+                "with the highest Human Development Index (HDI) of the following countries: "
                 "Norway – 0.957, "
                 "Switzerland and Ireland – 0.955, "
                 "Hong Kong (China) and Iceland - 0.949, "
