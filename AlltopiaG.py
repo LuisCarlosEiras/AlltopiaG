@@ -198,6 +198,43 @@ if st.button("Analyze your society with Google Generative AI"):
         
         except Exception as e:
             st.error(f"Error calling the Google Generative AI API: {str(e)}")
+# New additions start here
+st.subheader("Utopia vs Reality")
+
+if st.button("Compare your utopia with the best countries' indices"):
+    api_key = get_google_api_key()
+    if not api_key:
+        st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
+        st.info("If you're running this locally, you can set the API key in your system's environment variables.")
+    else:
+        try:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('google-generative-ai')
+            
+            comparison_prompt = (
+                f"Compare the generated analysis with the highest Human Development Index (HDI) of the following countries: "
+                "Norway – 0.957, "
+                "Switzerland and Ireland – 0.955, "
+                "Hong Kong (China) and Iceland - 0.949, "
+                "Germany – 0.947, "
+                "Sweden – 0.945, "
+                "Australia and Netherlands – 0.944, "
+                "Denmark -0.940, "
+                "Singapore and Finland – 0.938, "
+                "Finland – 0.938, "
+                "New Zealand and Belgium – 0.931, "
+                "Canada – 0.929, "
+                "United States – 0.926. Write a text of 10 lines."
+            )
+            
+            comparison_response = model.generate_content(comparison_prompt)
+            comparison_text = comparison_response.text
+            
+            st.subheader("Comparison with Real-World Indices")
+            st.write(comparison_text)
+        
+        except Exception as e:
+            st.error(f"Error calling the Google Generative AI API: {str(e)}")
 
 # Final notice
 st.markdown("""
