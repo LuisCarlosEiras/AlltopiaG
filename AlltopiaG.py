@@ -156,7 +156,8 @@ def get_google_api_key():
     return os.getenv("GOOGLE_API_KEY")
 
 # Analysis using Google Generative AI and OpenAI DALL-E 3
-if st.button("Analyze your society with AI and generate an image"):
+generate_image = st.button("Analyze your society with AI and generate an image")
+if generate_image:
     if not google_api_key or not openai.api_key:
         st.error("API key(s) not found. Please configure the GOOGLE_API_KEY and OPENAI_API_KEY in the environment variables.")
         st.info("If you're running this locally, you can set the API keys in your system's environment variables.")
@@ -168,9 +169,6 @@ if st.button("Analyze your society with AI and generate an image"):
             image_prompt_input = generate_image_prompt(values)
             image_prompt_response = model.generate_content(image_prompt_input)
             image_prompt = image_prompt_response.text
-            
-            st.subheader("Image Prompt")
-            st.write(image_prompt)
             
             # Generate image with DALL-E 3
             try:
@@ -193,12 +191,12 @@ if st.button("Analyze your society with AI and generate an image"):
                 "Write the analysis with subtitles and 5 paragraphs of text."
             )
             response = model.generate_content(input_text)
-            analysis = response.text
+            analysis_text = response.text
             
             st.subheader("Analysis of your utopia by Google Generative AI")
             
             # Split the analysis into paragraphs and subtitles
-            paragraphs = analysis.split('\n\n')
+            paragraphs = analysis_text.split('\n\n')
             for paragraph in paragraphs:
                 if ': ' in paragraph:
                     subtitle, text = paragraph.split(': ', 1)
