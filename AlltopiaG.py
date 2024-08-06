@@ -161,7 +161,7 @@ if 'generated_image' not in st.session_state:
 if 'analysis_text' not in st.session_state:
     st.session_state['analysis_text'] = None
 
-generate_image = st.button("Analyze your society with AI and generate an image")
+generate_image = st.button("Analyze your society with Gemini-pro")
 if generate_image:
     if not google_api_key or not openai.api_key:
         st.error("API key(s) not found. Please configure the GOOGLE_API_KEY and OPENAI_API_KEY in the environment variables.")
@@ -219,7 +219,7 @@ st.subheader("Utopia vs Reality")
 if 'comparison_text' not in st.session_state:
     st.session_state['comparison_text'] = None
 
-compare_utopia = st.button("Compare your utopia with the best countries' indices")
+compare_utopia = st.button("Use Gemini-pro to compare your utopia with the indices of the best countries")
 if compare_utopia:
     if not google_api_key:
         st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
@@ -260,4 +260,4 @@ st.markdown('</div>', unsafe_allow_html=True)
 # Subtitle
 st.markdown('<p class="subtitle">To generate a new utopia, change the characteristics above!</p>', unsafe_allow_html=True)
 
-# st.markdown('<p style="text-align: center; color: grey;">To generate a new utopia, change the characteristics above!</p>', unsafe_allow_html=True)
+
