@@ -8,9 +8,13 @@ import openai
 
 load_dotenv()
 
-os.getenv("GOOGLE_API_KEY")
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+google_api_key = os.getenv("GOOGLE_API_KEY")
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
+if google_api_key:
+    genai.configure(api_key=google_api_key)
+else:
+    st.error("Google API key not found.")
 
 # Characteristics of a utopian society
 characteristics = [
@@ -138,27 +142,30 @@ st.markdown('<p class="subtitle">Analysis of your utopia</p>', unsafe_allow_html
 st.write(f"Average of Values: {average:.2f}")
 st.write(f"Classification: {analysis}")
 
+# Function to generate the image prompt
+def generate_image_prompt(values):
+    prompt_lines = [
+        "Create an image that represents a utopian society with the following characteristics:",
+        ", ".join([f"{key}: {value}" for key, value in values.items()]),
+        "The prompt should have 3 lines of text."
+    ]
+    return "\n".join(prompt_lines)
+
 # Function to get the API key securely
 def get_google_api_key():
-    return os.environ.get("GOOGLE_API_KEY")
+    return os.getenv("GOOGLE_API_KEY")
 
 # Analysis using Google Generative AI and OpenAI DALL-E 3
 if st.button("Analyze your society with AI and generate an image"):
-    google_api_key = get_google_api_key()
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    if not google_api_key or not openai_api_key:
+    if not google_api_key or not openai.api_key:
         st.error("API key(s) not found. Please configure the GOOGLE_API_KEY and OPENAI_API_KEY in the environment variables.")
         st.info("If you're running this locally, you can set the API keys in your system's environment variables.")
     else:
         try:
-            genai.configure(api_key=google_api_key)
             model = genai.GenerativeModel('gemini-pro')
             
             # Generate prompt for image
-            image_prompt_input = (
-                f"Create an image that represents a utopian society with the following characteristics: {values}. "
-                "The prompt should have 3 lines of text."
-            )
+            image_prompt_input = generate_image_prompt(values)
             image_prompt_response = model.generate_content(image_prompt_input)
             image_prompt = image_prompt_response.text
             
@@ -209,13 +216,11 @@ st.markdown('</div>', unsafe_allow_html=True)
 st.subheader("Utopia vs Reality")
 
 if st.button("Compare your utopia with the best countries' indices"):
-    api_key = get_google_api_key()
-    if not api_key:
+    if not google_api_key:
         st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
         st.info("If you're running this locally, you can set the API key in your system's environment variables.")
     else:
         try:
-            genai.configure(api_key=api_key)
             model = genai.GenerativeModel('gemini-pro')
             
             comparison_prompt = (
