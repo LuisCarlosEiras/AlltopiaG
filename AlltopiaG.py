@@ -219,7 +219,7 @@ st.subheader("Utopia vs Reality")
 if 'comparison_text' not in st.session_state:
     st.session_state['comparison_text'] = None
 
-compare_utopia = st.button("Use Gemini-pro to compare your utopia with the indices of the best countries")
+compare_utopia = st.button("Use Google Gemini-pro to compare your utopia with the indices of the best countries")
 if compare_utopia:
     if not google_api_key:
         st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
