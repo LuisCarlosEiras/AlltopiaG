@@ -156,6 +156,11 @@ def get_google_api_key():
     return os.getenv("GOOGLE_API_KEY")
 
 # Analysis using Google Generative AI and OpenAI DALL-E 3
+if 'generated_image' not in st.session_state:
+    st.session_state['generated_image'] = None
+if 'analysis_text' not in st.session_state:
+    st.session_state['analysis_text'] = None
+
 generate_image = st.button("Analyze your society with AI and generate an image")
 if generate_image:
     if not google_api_key or not openai.api_key:
@@ -178,10 +183,7 @@ if generate_image:
                     size="1024x1024",
                     n=1,
                 )
-                image_url = response['data'][0]['url']
-                
-                st.subheader("Generated Image of Your Utopia")
-                st.image(image_url, caption="AI-generated representation of your utopia", use_column_width=True)
+                st.session_state['generated_image'] = response['data'][0]['url']
             except Exception as e:
                 st.error(f"Error generating image with DALL-E 3: {str(e)}")
             
@@ -191,29 +193,34 @@ if generate_image:
                 "Write the analysis with subtitles and 5 paragraphs of text."
             )
             response = model.generate_content(input_text)
-            analysis_text = response.text
-            
-            st.subheader("Analysis of your utopia by Google Generative AI")
-            
-            # Split the analysis into paragraphs and subtitles
-            paragraphs = analysis_text.split('\n\n')
-            for paragraph in paragraphs:
-                if ': ' in paragraph:
-                    subtitle, text = paragraph.split(': ', 1)
-                    st.markdown(f"**{subtitle}**")
-                    st.write(text)
-                else:
-                    st.write(paragraph)
+            st.session_state['analysis_text'] = response.text
         
         except Exception as e:
             st.error(f"Error calling the AI APIs: {str(e)}")
 
-st.markdown('</div>', unsafe_allow_html=True)
+if st.session_state['generated_image']:
+    st.subheader("Generated Image of Your Utopia")
+    st.image(st.session_state['generated_image'], caption="AI-generated representation of your utopia", use_column_width=True)
+
+if st.session_state['analysis_text']:
+    st.subheader("Analysis of your utopia by Google Generative AI")
+    paragraphs = st.session_state['analysis_text'].split('\n\n')
+    for paragraph in paragraphs:
+        if ': ' in paragraph:
+            subtitle, text = paragraph.split(': ', 1)
+            st.markdown(f"**{subtitle}**")
+            st.write(text)
+        else:
+            st.write(paragraph)
 
 # Utopia vs Reality section
 st.subheader("Utopia vs Reality")
 
-if st.button("Compare your utopia with the best countries' indices"):
+if 'comparison_text' not in st.session_state:
+    st.session_state['comparison_text'] = None
+
+compare_utopia = st.button("Compare your utopia with the best countries' indices")
+if compare_utopia:
     if not google_api_key:
         st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
         st.info("If you're running this locally, you can set the API key in your system's environment variables.")
@@ -233,19 +240,18 @@ if st.button("Compare your utopia with the best countries' indices"):
             )
             
             comparison_response = model.generate_content(comparison_prompt)
-            comparison_text = comparison_response.text
-            
-            st.subheader("Comparison with Real-World Indices")
-            
-            # Split the comparison text into paragraphs
-            paragraphs = comparison_text.split('\n\n')
-            
-            # Ensure we have exactly two paragraphs
-            if len(paragraphs) >= 2:
-                st.write(paragraphs[0])
-                st.write(paragraphs[1])
-            else:
-                st.write(comparison_text)
+            st.session_state['comparison_text'] = comparison_response.text
         
         except Exception as e:
             st.error(f"Error calling the Google Generative AI API: {str(e)}")
+
+if st.session_state['comparison_text']:
+    st.subheader("Comparison with Real-World Indices")
+    paragraphs = st.session_state['comparison_text'].split('\n\n')
+    if len(paragraphs) >= 2:
+        st.write(paragraphs[0])
+        st.write(paragraphs[1])
+    else:
+        st.write(st.session_state['comparison_text'])
+        
+st.markdown('</div>', unsafe_allow_html=True)
