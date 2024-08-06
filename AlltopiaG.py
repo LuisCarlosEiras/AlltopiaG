@@ -187,7 +187,7 @@ if st.button("Analyze your society with Google Generative AI"):
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# New additions start here
+# Utopia vs Reality section
 st.subheader("Utopia vs Reality")
 
 if st.button("Compare your utopia with the best countries' indices"):
@@ -228,7 +228,3 @@ if st.button("Compare your utopia with the best countries' indices"):
         
         except Exception as e:
             st.error(f"Error calling the Google Generative AI API: {str(e)}")
-
-
-
-
