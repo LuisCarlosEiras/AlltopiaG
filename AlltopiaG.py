@@ -237,6 +237,7 @@ if compare_utopia:
                 "Denmark -0.940, Singapore and Finland – 0.938, "
                 "New Zealand and Belgium – 0.931, Canada – 0.929, United States – 0.926. "
                 "Write the comparison in exactly two paragraphs, each with 10 lines."
+                "Always mention some of the countries on the list in the comparison."
             )
             
             comparison_response = model.generate_content(comparison_prompt)
