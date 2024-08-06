@@ -161,7 +161,7 @@ if 'generated_image' not in st.session_state:
 if 'analysis_text' not in st.session_state:
     st.session_state['analysis_text'] = None
 
-generate_image = st.button("Analyze your society with Gemini-pro")
+generate_image = st.button("Analyze your society with Google Gemini-pro")
 if generate_image:
     if not google_api_key or not openai.api_key:
         st.error("API key(s) not found. Please configure the GOOGLE_API_KEY and OPENAI_API_KEY in the environment variables.")
@@ -203,7 +203,7 @@ if st.session_state['generated_image']:
     st.image(st.session_state['generated_image'], caption="AI-generated representation of your utopia", use_column_width=True)
 
 if st.session_state['analysis_text']:
-    st.subheader("Analysis of your utopia by Google Generative AI")
+    st.subheader("Analysis of your utopia by Google Gemini-pro")
     paragraphs = st.session_state['analysis_text'].split('\n\n')
     for paragraph in paragraphs:
         if ': ' in paragraph:
