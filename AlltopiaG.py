@@ -257,4 +257,7 @@ if st.session_state['comparison_text']:
 st.markdown('</div>', unsafe_allow_html=True)
 
 # Final notice
-st.markdown('<p style="text-align: center; color: grey;">To generate a new utopia, change the characteristics above!</p>', unsafe_allow_html=True)
+# Subtitle
+st.markdown('<p class="subtitle">To generate a new utopia, change the characteristics above!</p>', unsafe_allow_html=True)
+
+# st.markdown('<p style="text-align: center; color: grey;">To generate a new utopia, change the characteristics above!</p>', unsafe_allow_html=True)
