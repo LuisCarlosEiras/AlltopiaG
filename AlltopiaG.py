@@ -151,7 +151,7 @@ def get_google_api_key():
     return os.environ.get("GOOGLE_API_KEY")
 
 # Analysis using Google Generative AI and OpenAI DALL-E 3
-if st.button("Analyze your society with AI and generate an image"):
+if st.button("Analyze your utopia with Google Gemini-pro"):
     google_api_key = get_google_api_key()
     openai_api_key = os.getenv("OPENAI_API_KEY")
     if not google_api_key or not openai_api_key:
@@ -200,7 +200,7 @@ if st.button("Analyze your society with AI and generate an image"):
 
 # Display the stored analysis text
 if st.session_state.analysis_text:
-    st.subheader("Analysis of your utopia by Google Generative AI")
+    st.subheader("Analysis of your utopia by Google Gemini-pro")
     paragraphs = st.session_state.analysis_text.split('\n\n')
     for paragraph in paragraphs:
         if ': ' in paragraph:
@@ -213,7 +213,7 @@ if st.session_state.analysis_text:
 # Utopia vs Reality section
 st.subheader("Utopia vs Reality")
 
-if st.button("Compare your utopia with the best countries' indices"):
+if st.button("Use Google Gemini-pro to compare your utopia with the best countries' indices"):
     api_key = get_google_api_key()
     if not api_key:
         st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
