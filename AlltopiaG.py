@@ -138,6 +138,14 @@ st.markdown('<p class="subtitle">Analysis of your utopia</p>', unsafe_allow_html
 st.write(f"Average of Values: {average:.2f}")
 st.write(f"Classification: {analysis}")
 
+# Use session state to store the generated analyses and image URLs
+if 'analysis_text' not in st.session_state:
+    st.session_state.analysis_text = ""
+if 'comparison_text' not in st.session_state:
+    st.session_state.comparison_text = ""
+if 'image_url' not in st.session_state:
+    st.session_state.image_url = ""
+
 # Function to get the API key securely
 def get_google_api_key():
     return os.environ.get("GOOGLE_API_KEY")
@@ -171,6 +179,7 @@ if st.button("Analyze your society with AI and generate an image"):
                     n=1,
                 )
                 image_url = response['data'][0]['url']
+                st.session_state.image_url = image_url
                 
                 st.subheader("Generated Image of Your Utopia")
                 st.image(image_url, caption="AI-generated representation of your utopia", use_column_width=True)
@@ -184,6 +193,7 @@ if st.button("Analyze your society with AI and generate an image"):
             )
             response = model.generate_content(input_text)
             analysis = response.text
+            st.session_state.analysis_text = analysis
             
             st.subheader("Analysis of your utopia by Google Generative AI")
             
@@ -200,7 +210,17 @@ if st.button("Analyze your society with AI and generate an image"):
         except Exception as e:
             st.error(f"Error calling the AI APIs: {str(e)}")
 
-st.markdown('</div>', unsafe_allow_html=True)
+# Display the stored analysis text
+if st.session_state.analysis_text:
+    st.subheader("Previous Analysis of your utopia by Google Generative AI")
+    paragraphs = st.session_state.analysis_text.split('\n\n')
+    for paragraph in paragraphs:
+        if ': ' in paragraph:
+            subtitle, text = paragraph.split(': ', 1)
+            st.markdown(f"**{subtitle}**")
+            st.write(text)
+        else:
+            st.write(paragraph)
 
 # Utopia vs Reality section
 st.subheader("Utopia vs Reality")
@@ -228,6 +248,7 @@ if st.button("Compare your utopia with the best countries' indices"):
             
             comparison_response = model.generate_content(comparison_prompt)
             comparison_text = comparison_response.text
+            st.session_state.comparison_text = comparison_text
             
             st.subheader("Comparison with Real-World Indices")
             
@@ -243,3 +264,15 @@ if st.button("Compare your utopia with the best countries' indices"):
         
         except Exception as e:
             st.error(f"Error calling the Google Generative AI API: {str(e)}")
+
+# Display the stored comparison text
+if st.session_state.comparison_text:
+    st.subheader("Previous Comparison with Real-World Indices")
+    paragraphs = st.session_state.comparison_text.split('\n\n')
+    if len(paragraphs) >= 2:
+        st.write(paragraphs[0])
+        st.write(paragraphs[1])
+    else:
+        st.write(st.session_state.comparison_text)
+
+st.markdown('</div>', unsafe_allow_html=True)
