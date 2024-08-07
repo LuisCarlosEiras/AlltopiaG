@@ -195,24 +195,12 @@ if st.button("Analyze your society with AI and generate an image"):
             analysis = response.text
             st.session_state.analysis_text = analysis
             
-            st.subheader("Analysis of your utopia by Google Generative AI")
-            
-            # Split the analysis into paragraphs and subtitles
-            paragraphs = analysis.split('\n\n')
-            for paragraph in paragraphs:
-                if ': ' in paragraph:
-                    subtitle, text = paragraph.split(': ', 1)
-                    st.markdown(f"**{subtitle}**")
-                    st.write(text)
-                else:
-                    st.write(paragraph)
-        
         except Exception as e:
             st.error(f"Error calling the AI APIs: {str(e)}")
 
 # Display the stored analysis text
 if st.session_state.analysis_text:
-    st.subheader("Previous Analysis of your utopia by Google Generative AI")
+    st.subheader("Analysis of your utopia by Google Generative AI")
     paragraphs = st.session_state.analysis_text.split('\n\n')
     for paragraph in paragraphs:
         if ': ' in paragraph:
@@ -250,24 +238,12 @@ if st.button("Compare your utopia with the best countries' indices"):
             comparison_text = comparison_response.text
             st.session_state.comparison_text = comparison_text
             
-            st.subheader("Comparison with Real-World Indices")
-            
-            # Split the comparison text into paragraphs
-            paragraphs = comparison_text.split('\n\n')
-            
-            # Ensure we have exactly two paragraphs
-            if len(paragraphs) >= 2:
-                st.write(paragraphs[0])
-                st.write(paragraphs[1])
-            else:
-                st.write(comparison_text)
-        
         except Exception as e:
             st.error(f"Error calling the Google Generative AI API: {str(e)}")
 
 # Display the stored comparison text
 if st.session_state.comparison_text:
-    st.subheader("Previous Comparison with Real-World Indices")
+    st.subheader("Comparison with Real-World Indices")
     paragraphs = st.session_state.comparison_text.split('\n\n')
     if len(paragraphs) >= 2:
         st.write(paragraphs[0])
