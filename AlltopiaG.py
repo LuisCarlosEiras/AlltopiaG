@@ -187,3 +187,4 @@ if st.button("Analyze your society with Google Generative AI"):
             st.error(f"Error calling the Google Generative AI API: {str(e)}")
 
 st.markdown('</div>', unsafe_allow_html=True)
+
