@@ -251,6 +251,6 @@ if st.session_state.comparison_text:
     else:
         st.write(st.session_state.comparison_text)
 
-st.write("To create a new utopia, adjust the characteristics above.")
+st.subheader("To create a new utopia, adjust the characteristics above.")
 
 st.markdown('</div>', unsafe_allow_html=True)
