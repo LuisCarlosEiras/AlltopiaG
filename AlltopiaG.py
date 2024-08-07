@@ -162,9 +162,6 @@ if st.button("Analyze your society with AI and generate an image"):
             image_prompt_response = model.generate_content(image_prompt_input)
             image_prompt = image_prompt_response.text
             
-            st.subheader("Image Prompt")
-            st.write(image_prompt)
-            
             # Generate image with DALL-E 3
             try:
                 response = openai.Image.create(
