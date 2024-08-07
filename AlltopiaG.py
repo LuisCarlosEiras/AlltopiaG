@@ -1,94 +1,189 @@
-import streamlit as st
-import google.generativeai as genai
-from dotenv import load_dotenv
 import os
-import re
+from dotenv import load_dotenv
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+import google.generativeai as genai
 
-# Carrega as variáveis de ambiente
 load_dotenv()
 
-# Configura a API do Google Gemini-Pro
-google_api_key = os.getenv("GOOGLE_API_KEY")
-genai.api_key = google_api_key
-model = genai.GenerativeModel('gemini-pro')
+os.getenv("GOOGLE_API_KEY")
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-def get_analogical_definition(word):
-    prompt = f"""Você é um dicionário analógico da língua portuguesa. Responda sempre em português do Brasil. Forneça uma definição analógica para a palavra: {word}
 
-    É CRUCIAL que você estruture sua resposta EXATAMENTE nas seguintes categorias, usando exatamente estes títulos:
+# Characteristics of a utopian society
+characteristics = [
+    "Social Equality",
+    "Justice and Equity",
+    "General Well-being",
+    "Peace and Harmony",
+    "Sustainability",
+    "Freedom",
+    "Technology and Innovation",
+    "Participatory Governance",
+    "Community and Solidarity",
+    "Happiness and Personal Fulfillment"
+]
 
-    Analogias:
-    Verbos:
-    Adjetivos:
-    Advérbios:
-    Frases:
+# CSS style for title, subtitles, and centered image
+st.markdown("""
+<style>
+    .full-width-title {
+        font-size: 50px;
+        font-weight: bold;
+        text-align: center;
+        color: #333333;
+        padding: 20px 0;
+        margin: 0;
+        width: 100%;
+    }
+    .subtitle {
+        font-size: 24px;
+        text-align: center;
+        color: #333333;
+        margin-top: -20px;
+        padding-bottom: 20px;
+    }
+    div.stButton > button:first-child {
+        background-color: #0066cc;
+        color: white;
+        font-size: 20px;
+        font-weight: bold;
+        padding: 14px 20px;
+        border-radius: 10px;
+        border: 2px solid #0066cc;
+        transition: all 0.3s;
+    }
+    div.stButton > button:first-child:hover {
+        background-color: #0052a3;
+        border-color: #0052a3;
+    }
+    .full-width-section {
+        padding: 20px;
+        margin-top: 30px;
+    }
+    .centered-image {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px 0;
+    }
+    .centered-image img {
+        max-width: 50%;
+        height: auto;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-    Para a categoria Verbos, forneça EXATAMENTE 30 itens separados por ponto e vírgula.
-    Para todas as outras categorias, forneça EXATAMENTE 20 itens separados por ponto e vírgula.
-    Se não houver itens suficientes para uma categoria, repita os itens existentes ou crie variações para chegar ao número necessário.
+# Full-width title
+st.markdown('<p class="full-width-title">Alltopia, the game</p>', unsafe_allow_html=True)
 
-    Exemplo de formato da resposta:
-    Analogias: item1; item2; item3; ...; item20
-    Verbos: verbo1; verbo2; verbo3; ...; verbo30
-    Adjetivos: adjetivo1; adjetivo2; adjetivo3; ...; adjetivo20
-    Advérbios: advérbio1; advérbio2; advérbio3; ...; advérbio20
-    Frases: frase1; frase2; frase3; ...; frase20
+# Subtitle
+st.markdown('<p class="subtitle">Create your perfect society</p>', unsafe_allow_html=True)
 
-    Forneça uma definição analógica para a palavra: {word}
-    """
-
-    try:
-        response = model.generate(
-            prompt=prompt,
-            max_tokens=3500,
-            temperature=0.7,
-        )
-        return response['choices'][0]['text'].strip()
-    except Exception as e:
-        st.error(f"Ocorreu um erro ao processar sua solicitação: {str(e)}")
-        return None
-
-def parse_response(response):
-    categories = ['Analogias', 'Verbos', 'Adjetivos', 'Advérbios', 'Frases']
-    parsed = {}
+# Function to analyze the society based on adjusted values
+def analyze_society(values):
+    average = sum(values.values()) / len(values)
     
-    for i, category in enumerate(categories):
-        if i < len(categories) - 1:
-            pattern = f"{category}:(.+?)(?={categories[i+1]}:)"
-        else:
-            pattern = f"{category}:(.+)"
+    if average >= 7:
+        analysis = "High Utopia"
+    elif average >= 4:
+        analysis = "Moderate Utopia"
+    else:
+        analysis = "Low Utopia"
+    
+    return average, analysis
+
+# Initialize the values dictionary
+values = {characteristic: 5.0 for characteristic in characteristics}
+
+# Split the screen into two equal columns
+col1, col2 = st.columns(2)
+
+# Create sliders for each characteristic in the left column
+with col1:
+    st.markdown('<p class="subtitle">Choose the characteristics</p>', unsafe_allow_html=True)
+    for characteristic in characteristics:
+        values[characteristic] = st.slider(characteristic, 0.0, 10.0, 5.0)
+
+# Display the bar chart in the right column
+with col2:
+    st.markdown('<p class="subtitle">Characteristic Values</p>', unsafe_allow_html=True)
+    
+    # Create a DataFrame for the chart
+    df = pd.DataFrame(list(values.items()), columns=['Characteristic', 'Value'])
+    
+    # Define a custom color palette
+    color_palette = px.colors.qualitative.Prism
+
+    # Create the bar chart using Plotly Express with different colors
+    fig = px.bar(df, x='Characteristic', y='Value', 
+                 labels={'Value': 'Score', 'Characteristic': ''},
+                 height=400,
+                 color='Characteristic',
+                 color_discrete_sequence=color_palette)
+    
+    fig.update_layout(xaxis_tickangle=-45, showlegend=False)
+    
+    # Display the chart
+    st.plotly_chart(fig, use_container_width=True)
+
+# Analyze the society
+average, analysis = analyze_society(values)
+
+# Full-width analysis section
+st.markdown('<div class="full-width-section">', unsafe_allow_html=True)
+st.markdown('<p class="subtitle">Analysis of your utopia</p>', unsafe_allow_html=True)
+st.write(f"Average of Values: {average:.2f}")
+st.write(f"Classification: {analysis}")
+
+# Function to get the API key securely
+def get_google_api_key():
+    return os.environ.get("GOOGLE_API_KEY")
+
+# Analysis using Google Generative AI
+if st.button("Analyze your society with Google Generative AI"):
+    api_key = get_google_api_key()
+    if not api_key:
+        st.error("Google API key not found. Please configure the GOOGLE_API_KEY in the environment variables.")
+        st.info("If you're running this locally, you can set the API key in your system's environment variables.")
+    else:
+        try:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('google-generative-ai')
+            
+            input_text = (
+                f"Analyze the utopian society with the following characteristics: {values}. "
+                "Write the analysis with subtitles and 5 paragraphs of text."
+            )
+            response = model.generate_content(input_text)
+            analysis = response.text
+            
+            # Generate prompt for image
+            image_prompt_input = (
+                f"Create an image that represents a utopian society with the following characteristics: {values}. "
+                "The prompt should have 3 lines of text."
+            )
+            image_prompt_response = model.generate_content(image_prompt_input)
+            image_prompt = image_prompt_response.text
+            
+            st.subheader("Analysis of your utopia by Google Generative AI")
+            
+            # Split the analysis into paragraphs and subtitles
+            paragraphs = analysis.split('\n\n')
+            for paragraph in paragraphs:
+                if ': ' in paragraph:
+                    subtitle, text = paragraph.split(': ', 1)
+                    st.markdown(f"**{subtitle}**")
+                    st.write(text)
+                else:
+                    st.write(paragraph)
+            
+            st.subheader("Image Prompt")
+            st.write(image_prompt)
+            st.write("Note: Image generation is not available with Google Generative AI. You may need to use a separate image generation service or provide a placeholder image.")
         
-        match = re.search(pattern, response, re.DOTALL)
-        if match:
-            items = [item.strip() for item in match.group(1).split(';') if item.strip()]
-            # Ensure we have the correct number of items
-            if category == 'Verbos':
-                items = (items * ((30 + len(items) - 1) // len(items)))[:30]
-            else:
-                items = (items * ((20 + len(items) - 1) // len(items)))[:20]
-            parsed[category] = items
-        else:
-            parsed[category] = ['N/A'] * (30 if category == 'Verbos' else 20)
-    
-    return parsed
+        except Exception as e:
+            st.error(f"Error calling the Google Generative AI API: {str(e)}")
 
-st.title("**Dicionário Analógico** da Língua Portuguesa")
-
-st.write("""
-Se num dicionário comum se procura o significado exato de uma palavra, neste **Dicionário Analógico** se procura o inverso: o máximo de significados de uma palavra.
-""")
-
-word = st.text_input("Digite uma palavra para ver suas analogias:")
-
-if word:
-    with st.spinner('Buscando definição analógica...'):
-        definition = get_analogical_definition(word)
-    if definition:
-        parsed_definition = parse_response(definition)
-        for category, items in parsed_definition.items():
-            st.subheader(f"{category}")
-            st.write(", ".join(items))
-
-# Adicione isso no final do seu script para verificar se a chave API está definida
-if not google_api_key:
-    st.error("A chave API do Google não está definida. Por favor, configure a variável de ambiente GOOGLE_API_KEY.")
+st.markdown('</div>', unsafe_allow_html=True)
