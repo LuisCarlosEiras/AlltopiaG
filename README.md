@@ -2,7 +2,7 @@
 
 #### Alltopia, the game,  uses Google Gemini-pro to analyze a utopian society based on selected characteristics and compare it with real-world country indices.
 
-In this project, Google Gemini-pro is used for two main purposes: textual analysis and content generation.
+In this this functional prototype , Google Gemini-pro is used for two main purposes: textual analysis and content generation.
 
 #### 1. Textual Analysis:
 Google Gemini-pro performs a detailed analysis of the utopian society created by the user. After the user adjusts the values of characteristics for an ideal society, such as "Social Equality" and "Sustainability," a prompt is generated to request a textual analysis. Google Gemini-pro processes this prompt and generates a text describing the utopian society based on the provided values. This analysis includes subtitles and multiple paragraphs, offering a detailed view of the idealized society.
